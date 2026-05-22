@@ -1,0 +1,39 @@
+BIN_DIR := C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin
+CC      := "$(BIN_DIR)/arm-none-eabi-gcc"
+
+TARGET = blinky
+
+# 1. 소스 파일 정리: 와일드카드를 쓰되, 복잡한 BSP 소스 하나를 제외하거나 가짜로 대체해야 함
+SRCS   = ./src/sst.c \
+         ./ports/arm-cm/sst_port.c \
+         ./examples/blinky/blinky.c \
+         ./examples/blinky/main.c
+		 #../3rd_party/nucleo-c031c6/*.c
+
+# 2. 컴파일 옵션
+CFLAGS = -mcpu=cortex-m4 -mthumb -g -O0 \
+         -I../include \
+         -I./src \
+         -I./ports/arm-cm \
+         -I./examples/blinky \
+         #-I../3rd_party/CMSIS/Include\
+		 -I../3rd_party/nucleo-c031c6/
+
+# 3. 링커 옵션 (여기가 핵심!)
+# --specs=nosys.specs: _exit 등 시스템 콜 미구현 에러 방지
+LDFLAGS = --specs=nosys.specs
+
+.PHONY: all clean
+
+all: $(TARGET).elf
+
+$(TARGET).elf: $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) $(LDFLAGS) -o $@
+	@echo "Build Successful: $@"
+
+.PHONY: clean
+
+clean:
+	@echo Cleaning...
+	rm -f *.o *.elf *.map
+	@echo Clean finished.

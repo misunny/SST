@@ -1,0 +1,38 @@
+BIN_DIR := C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin
+CC      := "$(BIN_DIR)/arm-none-eabi-gcc"
+OBJCOPY := "$(BIN_DIR)/arm-none-eabi-objcopy"
+
+TARGET = blinky
+
+# $(wildcard ...)를 사용하여 파일 목록을 가져옵니다.
+SRCS   = ./src/sst.c \
+         $(wildcard ./ports/arm-cm/*.c) \
+         $(wildcard ./examples/blinky/*.c) \
+         $(wildcard ./examples/blinky_button/*.c)
+
+CFLAGS = -mcpu=cortex-m4 -mthumb -g -O0 \
+         -I../3rd_party/CMSIS/Include\
+		 -I../3rd_party/ek-tm4c123gxl\
+		 -I../3rd_party/nucleo-c031c6\
+		 -I../3rd_party/nucleo-h743zi\
+		 -I../3rd_party/nucleo-l053r8\
+         -I../include \
+         -I./src \
+         -I./ports/arm-cm \
+         -I./examples/blinky \
+         -I./examples/blinky_button
+
+.PHONY: all clean
+
+all: $(TARGET).elf
+
+$(TARGET).elf: $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) -o $@
+	@echo "Build Successful: $@"
+
+clean:
+	@echo Cleaning build artifacts...
+	@if exist *.o del /q *.o
+	@if exist *.elf del /q *.elf
+	@if exist *.map del /q *.map
+	@echo Done.
